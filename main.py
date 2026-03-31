@@ -23,28 +23,28 @@ def get_gold():
         return float(data["price"])
     return None
 
-last_price = None
+# ===== STATE =====
+prices = []
 
 def check_gold():
-    global last_price
+    global prices
 
     price = get_gold()
 
     if price is None:
         return
 
-    if last_price:
-        move = price - last_price
+    prices.append(price)
 
-        # ICC-style filter (only strong moves)
-        if abs(move) > 2:
+    # keep last 10 prices only
+    if len(prices) > 10:
+        prices.pop(0)
 
-            if move > 0:
-                send(f"""
-📈 GOLD BUY (ICC)
+    # need enough data
+    if len(prices) < 5:
+        return
 
-Price: {price}
-Momentum: Strong bullish move
-Bias: Continuation
-""")
+    high = max(prices[:-1])
+    low = min(prices[:-1])
+
 
