@@ -25,24 +25,26 @@ def get_gold():
 
 last_price = None
 
-while True:
-    try:
-        price = get_gold()
+def check_gold():
+    global last_price
 
-        if price is None:
-            time.sleep(60)
-            continue
+    price = get_gold()
 
-        if last_price:
-            if price > last_price:
-                send(f"📈 GOLD BUY\nPrice: {price}")
-            elif price < last_price:
-                send(f"📉 GOLD SELL\nPrice: {price}")
+    if price is None:
+        return
 
-        last_price = price
-        time.sleep(60)
+    if last_price:
+        move = price - last_price
 
-    except Exception as e:
-        print("ERROR:", e)
-        time.sleep(60)
+        # ICC-style filter (only strong moves)
+        if abs(move) > 2:
+
+            if move > 0:
+                send(f"""
+📈 GOLD BUY (ICC)
+
+Price: {price}
+Momentum: Strong bullish move
+Bias: Continuation
+""")
 
