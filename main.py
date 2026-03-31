@@ -2,12 +2,10 @@ import requests
 import time
 import os
 
-# ===== ENV =====
 TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
-TWELVE_KEY = os.getenv("TWELVE_API_KEY")
+API_KEY = os.getenv("TWELVE_API_KEY")
 
-# ===== TELEGRAM =====
 def send(msg):
     try:
         url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
@@ -15,48 +13,36 @@ def send(msg):
     except:
         pass
 
-# ===== DATA =====
 def get_gold():
-    url = f"https://api.twelvedata.com/price?symbol=XAU/USD&apikey={TWELVE_KEY}"
+    url = f"https://api.twelvedata.com/price?symbol=XAU/USD&apikey={API_KEY}"
     data = requests.get(url).json()
-    return float(data["price"])
 
-# ===== STATE =====
-last_gold = None
+    print(data)
 
-# ===== LOGIC =====
-def check_gold():
-    global last_gold
-    price = get_gold()
+    if "price" in data:
+        return float(data["price"])
+    return None
 
-    if last_gold:
-        if price > last_gold:
-            entry = price
-            sl = entry - 5
-            tp = entry + (entry - sl) * 4
+last_price = None
 
-            send(f"""📈 GOLD BUY
-
-Entry: {entry}
-SL: {sl}
-TP: {tp}
-""")
-
-        elif price < last_gold:
-            entry = price
-            sl = entry + 5
-            tp = entry - (sl - entry) * 4
-
-            send(f"""📉 GOLD SELL
-
-Entry: {entry}
-SL: {sl}
-TP: {tp}
-""")
-
-    last_gold = price
-
-# ===== LOOP =====
 while True:
-    check_gold()
-    time.sleep(60)
+    try:
+        price = get_gold()
+
+        if price is None:
+            time.sleep(60)
+            continue
+
+        if last_price:
+            if price > last_price:
+                send(f"📈 GOLD BUY\nPrice: {price}")
+            elif price < last_price:
+                send(f"📉 GOLD SELL\nPrice: {price}")
+
+        last_price = price
+        time.sleep(60)
+
+    except Exception as e:
+        print("ERROR:", e)
+        time.sleep(60)
+
