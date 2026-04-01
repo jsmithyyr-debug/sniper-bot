@@ -1,50 +1,30 @@
-import requests
 import time
-import os
 
-TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
-CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
-API_KEY = os.getenv("TWELVE_API_KEY")
+# 🔥 TEST SIGNAL FUNCTION (replace later with real alerts)
+def send_signal(message):
+    print(f"SIGNAL: {message}")
 
-def send(msg):
+# 🔍 YOUR STRATEGY FUNCTION
+def check_for_setups():
+    print("Checking market...")
+
+    # 👉 TEMP TEST (forces a signal every loop)
+    send_signal("TEST BUY | SL: 10 | TP: 40")
+
+    # 🚫 REMOVE ABOVE LATER
+    # Replace with your ICC logic like:
+    # if condition:
+    #     send_signal("REAL TRADE")
+
+# 🚀 START BOT
+print("🚀 BOT STARTED")
+
+# 🔁 MAIN LOOP (THIS IS WHAT YOU WERE MISSING)
+while True:
     try:
-        url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
-        requests.post(url, data={"chat_id": CHAT_ID, "text": msg})
-    except:
-        pass
+        check_for_setups()
+        time.sleep(10)  # runs every 10 seconds (change to 60 later)
 
-def get_gold():
-    url = f"https://api.twelvedata.com/price?symbol=XAU/USD&apikey={API_KEY}"
-    data = requests.get(url).json()
-
-    print(data)
-
-    if "price" in data:
-        return float(data["price"])
-    return None
-
-# ===== STATE =====
-prices = []
-
-def check_gold():
-    global prices
-
-    price = get_gold()
-
-    if price is None:
-        return
-
-    prices.append(price)
-
-    # keep last 10 prices only
-    if len(prices) > 10:
-        prices.pop(0)
-
-    # need enough data
-    if len(prices) < 5:
-        return
-
-    high = max(prices[:-1])
-    low = min(prices[:-1])
-
-
+    except Exception as e:
+        print(f"Error: {e}")
+        time.sleep(5)
